@@ -24,7 +24,7 @@ PAGE_WIDTH_MM: Final[float] = 210.0
 PAGE_HEIGHT_MM: Final[float] = 297.0
 
 # Millimetres per typographic point
-FONT_POINT_MM: Final[float] = 0.3528
+FONT_MM_PER_PT: Final[float] = 0.3528
 
 # Use the built-in Courier monospace font
 FONT_FACE: Final[str] = "Courier"
