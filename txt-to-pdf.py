@@ -80,12 +80,12 @@ def paginate(lines: list[str]) -> list[list[str]]:
 
 
 def pdf_string(s: str) -> bytes:
-    """Encode a string as a PDF literal: (…), with `\\`, `(`, `)` and non-printables escaped."""
+    """Encode a string as a PDF literal: (…), with `\\`, `(`, `)` and non-printables escaped.
+
+    Characters are mapped to single bytes via cp1252, which matches the PDF's WinAnsiEncoding closely enough to cover the typographic punctuation (em/en dashes, smart quotes, ellipsis, bullet, dagger, €, ™, …) on top of plain ASCII and Latin-1.  Anything outside cp1252 is replaced with `?`.
+    """
     out = bytearray(b"(")
-    for ch in s:
-        cp = ord(ch)
-        # Anything outside the single-byte range gets replaced; WinAnsiEncoding can't represent it.
-        b = cp if cp <= 0xFF else ord("?")
+    for b in s.encode("cp1252", errors="replace"):
         if b in (0x28, 0x29, 0x5C):  # ( ) \
             out.append(0x5C)
             out.append(b)
@@ -186,9 +186,14 @@ def main() -> None:
     pages = paginate(lines)
     write_pdf(pages)
 
-    # Codepoints above 0xFF can't be encoded in a single byte under WinAnsiEncoding;
-    # pdf_string substitutes '?' for these.  Report a single summary line on stderr.
-    unencodable = [ch for ch in text if ord(ch) > 0xFF]
+    # pdf_string replaces any character outside cp1252 / WinAnsiEncoding with '?'.
+    # Report a single summary line on stderr if any such substitutions happened.
+    unencodable: list[str] = []
+    for ch in text:
+        try:
+            ch.encode("cp1252")
+        except UnicodeEncodeError:
+            unencodable.append(ch)
     if unencodable:
         distinct = sorted(set(unencodable))
         shown = distinct[:5]
@@ -196,8 +201,8 @@ def main() -> None:
         if len(distinct) > len(shown):
             examples += f", and {len(distinct) - len(shown)} more"
         print(
-            f"txt-to-pdf.py: warning: {len(unencodable)} non-Latin-1 "
-            f"character(s) replaced with '?': {examples}",
+            f"txt-to-pdf.py: warning: {len(unencodable)} character(s) outside "
+            f"WinAnsiEncoding replaced with '?': {examples}",
             file=stderr,
         )
 
