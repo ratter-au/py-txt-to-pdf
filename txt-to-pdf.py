@@ -12,6 +12,7 @@ from typing import (
     Final,
 )
 from sys import (
+    stderr,
     stdin,
     stdout,
 )
@@ -56,9 +57,13 @@ text_wrapper: Final[TextWrapper] = TextWrapper(
 
 
 def wrap_lines(text: str) -> list[str]:
-    """Soft-wrap each input line that exceeds the column width; pass shorter lines through verbatim."""
+    """Soft-wrap each input line that exceeds the column width; pass shorter lines through verbatim.
+
+    Tabs are expanded to eight-column tab stops, since Courier has no tab glyph and rendering them as PDF escape sequences would just produce invisible characters.
+    """
     out: list[str] = []
     for line in text.splitlines():
+        line = line.expandtabs(8)
         if len(line) <= PAGE_COLUMNS:
             out.append(line)
         else:
@@ -180,6 +185,21 @@ def main() -> None:
     lines = wrap_lines(text)
     pages = paginate(lines)
     write_pdf(pages)
+
+    # Codepoints above 0xFF can't be encoded in a single byte under WinAnsiEncoding;
+    # pdf_string substitutes '?' for these.  Report a single summary line on stderr.
+    unencodable = [ch for ch in text if ord(ch) > 0xFF]
+    if unencodable:
+        distinct = sorted(set(unencodable))
+        shown = distinct[:5]
+        examples = ", ".join(f"{ch!r} (U+{ord(ch):04X})" for ch in shown)
+        if len(distinct) > len(shown):
+            examples += f", and {len(distinct) - len(shown)} more"
+        print(
+            f"txt-to-pdf.py: warning: {len(unencodable)} non-Latin-1 "
+            f"character(s) replaced with '?': {examples}",
+            file=stderr,
+        )
 
 
 if __name__ == "__main__":
