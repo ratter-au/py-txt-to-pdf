@@ -7,7 +7,7 @@ The script reads from standard input and writes to standard output.  Use the she
 python3 txt-to-pdf.py < example.txt > example.pdf
 ```
 
-The paper size is hard‐coded to A4 and the font is hard‐coded to 12‐point Courier (one of the 14 standard PDF fonts, so it doesn't need to be embedded in the document).  Text will be re‐encoded using Windows code page 1252; characters outside this set will be replaced with a question mark in the PDF, and a warning will be printed to standard error.
+The paper size is hard‐coded to A4 and the font is hard‐coded to 12‐point Courier (one of the 14 standard PDF fonts, so it doesn't need to be embedded in the document), with a 15 mm margin on each edge: this gives 70 columns and 63 lines per page.  Text will be re‐encoded using Windows code page 1252; characters outside this set will be replaced with a question mark in the PDF, and a warning will be printed to standard error.
 
 """
 
