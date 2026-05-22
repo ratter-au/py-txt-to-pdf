@@ -207,7 +207,7 @@ def main() -> None:
         if len(distinct) > len(shown):
             examples += f", and {len(distinct) - len(shown)} more"
         print(
-            f"txt-to-pdf.py: warning: {len(unencodable)} character(s) outside WinAnsiEncoding replaced with '?': {examples}",
+            f"txt-to-pdf.py: warning: {len(unencodables)} character(s) outside WinAnsiEncoding replaced with '?': {examples}",
             file=stderr,
         )
 
