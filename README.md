@@ -17,7 +17,8 @@ python3 txt-to-pdf.py < example.txt > example.pdf
 ## To do
 
 - Tests!
-- Rewrite some of Claude's code to suit my own style.
+- Continue refactoring Claude's code to suit my own style.
+- Rewrite using generators, with streaming input & output.
 
 ## License
 
